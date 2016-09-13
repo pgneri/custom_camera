@@ -1,0 +1,43 @@
+{
+    "prepare_queue": {
+        "installed": [],
+        "uninstalled": []
+    },
+    "config_munge": {
+        "files": {
+            "config.xml": {
+                "parents": {
+                    "/*": [
+                        {
+                            "xml": "<feature name=\"CustomCamera\"><param name=\"ios-package\" value=\"CustomCamera\" /></feature>",
+                            "count": 1
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "installed_plugins": {
+        "cordova-plugin-whitelist": {
+            "PACKAGE_NAME": "com.example.customcamerastf"
+        },
+        "com.performanceactive.plugins.camera": {
+            "PACKAGE_NAME": "com.example.customcamerastf"
+        }
+    },
+    "dependent_plugins": {},
+    "modules": [
+        {
+            "file": "plugins/com.performanceactive.plugins.camera/js/customcamera.js",
+            "id": "com.performanceactive.plugins.camera.customCamera",
+            "pluginId": "com.performanceactive.plugins.camera",
+            "clobbers": [
+                "navigator.customCamera"
+            ]
+        }
+    ],
+    "plugin_metadata": {
+        "cordova-plugin-whitelist": "1.2.2",
+        "com.performanceactive.plugins.camera": "2.0"
+    }
+}
