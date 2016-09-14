@@ -23,6 +23,7 @@
     UIActivityIndicatorView *_activityIndicator;
     UIView *_topPanel;
     UIView *_bottomPanel;
+    UIView *_fullPanel;
     
 }
 
@@ -68,6 +69,16 @@ static const CGFloat kAspectRatio = 125.0f / 86;
     [_activityIndicator startAnimating];
 }
 
+- (UIView*)createOverlayFullScreen {
+    UIView *overlay = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    
+    _fullPanel = [[UIView alloc] initWithFrame:CGRectZero];
+    [_fullPanel setBackgroundColor: [UIColor colorWithRed:0 green:0 blue:0 alpha:0.7]];
+    [overlay addSubview:_fullPanel];
+    
+    return overlay;
+}
+
 - (UIView*)createOverlayTop {
     UIView *overlay = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     
@@ -78,6 +89,7 @@ static const CGFloat kAspectRatio = 125.0f / 86;
     return overlay;
     
 }
+
 
 - (UIView*)createOverlayBottom {
     UIView *overlay = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
@@ -114,6 +126,11 @@ static const CGFloat kAspectRatio = 125.0f / 86;
     [_backButton addTarget:self action:@selector(dismissCameraPreview) forControlEvents:UIControlEventTouchUpInside];
     [overlay addSubview:_backButton];
     
+    [self.view addSubview:[self createOverlayFullScreen]];
+//    [self.view addSubview:[self createOverlayTop]];
+//    [self.view addSubview:[self createOverlayBottom]];
+
+    
     CGRect circleRect = CGRectMake(0, (bounds.size.height-bounds.size.width) / 2, bounds.size.width, bounds.size.width);
         UIBezierPath *circle = [UIBezierPath bezierPathWithOvalInRect:circleRect];
         CAShapeLayer *ringLayer = [CAShapeLayer layer];
@@ -122,10 +139,8 @@ static const CGFloat kAspectRatio = 125.0f / 86;
         ringLayer.strokeColor = [UIColor blackColor].CGColor;
         ringLayer.lineWidth = 2.0;
 
-        [self.view.layer addSublayer:ringLayer];
+    [self.view.layer addSublayer:ringLayer];
 
-//    [self.view addSubview:[self createOverlayTop]];
-//    [self.view addSubview:[self createOverlayBottom]];
     
     
     return overlay;
@@ -171,6 +186,9 @@ static const CGFloat kAspectRatio = 125.0f / 86;
      
      CGFloat bottomsize = kCaptureButtonHeightPhone + (kCaptureButtonVerticalInsetPhone * 2);
      
+     _fullPanel.frame = CGRectMake(0, 0, bounds.size.width,
+                                  bounds.size.height);
+     
      _topPanel.frame = CGRectMake(0, 0, bounds.size.width,
                                   bounds.size.height/2 - bottomsize/2);
      
@@ -183,6 +201,9 @@ static const CGFloat kAspectRatio = 125.0f / 86;
     CGRect bounds = [[UIScreen mainScreen] bounds];
     
     CGFloat bottomsize = kCaptureButtonHeightPhone + (kCaptureButtonVerticalInsetPhone * 2);
+    
+    _fullPanel.frame = CGRectMake(0, 0, bounds.size.width,
+                                  bounds.size.height);
     
     _topPanel.frame = CGRectMake(0, 0, bounds.size.width,
                                  bounds.size.height/2 - bottomsize/2);
