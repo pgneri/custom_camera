@@ -128,7 +128,8 @@ static const CGFloat kCaptureButtonVerticalInsetTablet = 20;
 
 - (UIView*)createOverlay {
     UIView *overlay = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    
+
+// Button to change Camera (Back - Front) - Comment dismiss to use
 //    _changeCamera = [UIButton buttonWithType:UIButtonTypeCustom];
 //    [_changeCamera setImage:[UIImage imageNamed:@"www/img/icons/camera_toggle.png"] forState:UIControlStateNormal];
 //    [_changeCamera setImage:[UIImage imageNamed:@"www/img/icons/camera_toggle-touched.png"] forState:UIControlStateSelected];
