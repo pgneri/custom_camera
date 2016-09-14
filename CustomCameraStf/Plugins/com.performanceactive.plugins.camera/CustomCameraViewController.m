@@ -43,8 +43,6 @@ static const CGFloat kBackButtonWidthTablet = 150;
 static const CGFloat kBackButtonHeightTablet = 50;
 static const CGFloat kCaptureButtonVerticalInsetTablet = 20;
 
-static bool frontCamera = YES;
-
 //static const CGFloat kAspectRatio = 125.0f / 86;
 
 
@@ -81,7 +79,7 @@ static bool frontCamera = YES;
     UIView *overlay = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     
     _fullPanel = [[UIView alloc] initWithFrame:CGRectZero];
-    [_fullPanel setBackgroundColor: [UIColor colorWithRed:0 green:0 blue:0 alpha:0.9]];
+    [_fullPanel setBackgroundColor: [UIColor clearColor]];
     [overlay addSubview:_fullPanel];
     
     return overlay;
@@ -89,20 +87,20 @@ static bool frontCamera = YES;
 
 - (CALayer*)createLayerCircle {
     CGRect bounds = [[UIScreen mainScreen] bounds];
-
-    CGRect circleRect = CGRectMake(0, (bounds.size.height-bounds.size.width) / 2, bounds.size.width, bounds.size.width);
-    UIBezierPath *circle = [UIBezierPath bezierPathWithOvalInRect:circleRect];
-    CAShapeLayer *ringLayer = [CAShapeLayer layer];
-    [circle setUsesEvenOddFillRule:YES];
-    ringLayer.path = circle.CGPath;
-    ringLayer.fillRule = kCAFillRuleEvenOdd;
-    ringLayer.fillColor = [UIColor grayColor].CGColor;
-    ringLayer.opacity = 0.2;
-    ringLayer.strokeColor = [UIColor blackColor].CGColor;
-    ringLayer.lineWidth = 2.0;
-    ringLayer.opaque = NO;
     
-    return ringLayer;
+    int radius = bounds.size.width;
+    UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(0, 0, bounds.size.width, bounds.size.height) cornerRadius:0];
+    UIBezierPath *circlePath = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(0, (bounds.size.height-bounds.size.width)/2, radius, radius) cornerRadius:radius];
+    [path appendPath:circlePath];
+    [path setUsesEvenOddFillRule:YES];
+    
+    CAShapeLayer *fillLayer = [CAShapeLayer layer];
+    fillLayer.path = path.CGPath;
+    fillLayer.fillRule = kCAFillRuleEvenOdd;
+    fillLayer.fillColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.9].CGColor;
+    fillLayer.opacity = 0.9;
+
+    return fillLayer;
 }
 
 - (UIView*)createOverlayTop {
@@ -138,7 +136,7 @@ static bool frontCamera = YES;
     
 
     _buttonPanel = [[UIView alloc] initWithFrame:CGRectZero];
-    [_buttonPanel setBackgroundColor: [UIColor blackColor]];
+    [_buttonPanel setBackgroundColor: [UIColor clearColor]];
     [overlay addSubview:_buttonPanel];
     
     _captureButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -358,55 +356,7 @@ static bool frontCamera = YES;
     return nil;
 }
 
-- (AVCaptureDevice *)backCamera
-{
-    //  look at all the video devices and get the first one that's on the front
-    NSArray *videoDevices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
-    AVCaptureDevice *captureDevice = nil;
-    for (AVCaptureDevice *device in videoDevices)
-    {
-        if (device.position == AVCaptureDevicePositionBack)
-        {
-            captureDevice = device;
-            break;
-        }
-    }
-    
-    //  couldn't find one on the front, so just get the default video device.
-    if ( ! captureDevice)
-    {
-        captureDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
-    }
-    
-    return captureDevice;
-}  
-
-- (AVCaptureDevice *)frontFacingCameraIfAvailable
-{
-    //  look at all the video devices and get the first one that's on the front
-    NSArray *videoDevices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
-    AVCaptureDevice *captureDevice = nil;
-    for (AVCaptureDevice *device in videoDevices)
-    {
-        if (device.position == AVCaptureDevicePositionFront)
-        {
-            captureDevice = device;
-            break;
-        }
-    }
-    
-    //  couldn't find one on the front, so just get the default video device.
-    if ( ! captureDevice)
-    {
-        captureDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
-    }
-    
-    return captureDevice;
-}  
-
-
-
- - (NSUInteger)supportedInterfaceOrientations {
+- (NSUInteger)supportedInterfaceOrientations {
     return UIInterfaceOrientationMaskPortrait;
 }
 
