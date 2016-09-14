@@ -20,6 +20,7 @@
     UIView *_buttonPanel;
     UIButton *_captureButton;
     UIButton *_backButton;
+    UIButton *_changeCamera;
     UIActivityIndicatorView *_activityIndicator;
     UIView *_topPanel;
     UIView *_bottomPanel;
@@ -27,6 +28,9 @@
     
 }
 
+
+static const CGFloat kChangeCameraButtonWidthPhone = 64;
+static const CGFloat kChangeCameraButtonHeightPhone = 64;
 static const CGFloat kCaptureButtonWidthPhone = 64;
 static const CGFloat kCaptureButtonHeightPhone = 64;
 static const CGFloat kBackButtonWidthPhone = 100;
@@ -39,10 +43,14 @@ static const CGFloat kBackButtonWidthTablet = 150;
 static const CGFloat kBackButtonHeightTablet = 50;
 static const CGFloat kCaptureButtonVerticalInsetTablet = 20;
 
-static const CGFloat kAspectRatio = 125.0f / 86;
+static bool frontCamera = YES;
+
+//static const CGFloat kAspectRatio = 125.0f / 86;
+
 
 - (id)initWithCallback:(void(^)(UIImage*))callback {
     self = [super initWithNibName:nil bundle:nil];
+    
     if (self) {
         _callback = callback;
         _captureSession = [[AVCaptureSession alloc] init];
@@ -73,10 +81,28 @@ static const CGFloat kAspectRatio = 125.0f / 86;
     UIView *overlay = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     
     _fullPanel = [[UIView alloc] initWithFrame:CGRectZero];
-    [_fullPanel setBackgroundColor: [UIColor colorWithRed:0 green:0 blue:0 alpha:0.7]];
+    [_fullPanel setBackgroundColor: [UIColor colorWithRed:0 green:0 blue:0 alpha:0.9]];
     [overlay addSubview:_fullPanel];
     
     return overlay;
+}
+
+- (CALayer*)createLayerCircle {
+    CGRect bounds = [[UIScreen mainScreen] bounds];
+
+    CGRect circleRect = CGRectMake(0, (bounds.size.height-bounds.size.width) / 2, bounds.size.width, bounds.size.width);
+    UIBezierPath *circle = [UIBezierPath bezierPathWithOvalInRect:circleRect];
+    CAShapeLayer *ringLayer = [CAShapeLayer layer];
+    [circle setUsesEvenOddFillRule:YES];
+    ringLayer.path = circle.CGPath;
+    ringLayer.fillRule = kCAFillRuleEvenOdd;
+    ringLayer.fillColor = [UIColor grayColor].CGColor;
+    ringLayer.opacity = 0.2;
+    ringLayer.strokeColor = [UIColor blackColor].CGColor;
+    ringLayer.lineWidth = 2.0;
+    ringLayer.opaque = NO;
+    
+    return ringLayer;
 }
 
 - (UIView*)createOverlayTop {
@@ -90,7 +116,6 @@ static const CGFloat kAspectRatio = 125.0f / 86;
     
 }
 
-
 - (UIView*)createOverlayBottom {
     UIView *overlay = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     
@@ -103,10 +128,14 @@ static const CGFloat kAspectRatio = 125.0f / 86;
 
 - (UIView*)createOverlay {
     UIView *overlay = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    CGRect bounds = [[UIScreen mainScreen] bounds];
-    [self.view setBackgroundColor:[UIColor colorWithRed:0 green:0 blue:0 alpha:0.7]];
     
-    overlay .backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.7];
+    _changeCamera = [UIButton buttonWithType:UIButtonTypeCustom];
+    [_changeCamera setImage:[UIImage imageNamed:@"www/img/icons/change-camera.png"] forState:UIControlStateNormal];
+    [_changeCamera setImage:[UIImage imageNamed:@"www/img/icons/change-camera-touched.png"] forState:UIControlStateSelected];
+    [_changeCamera setImage:[UIImage imageNamed:@"www/img/icons/change-camera-touched.png"] forState:UIControlStateHighlighted];
+    [_changeCamera addTarget:self action:@selector(changeCamera) forControlEvents:UIControlEventTouchUpInside];
+    [overlay addSubview:_changeCamera];
+    
 
     _buttonPanel = [[UIView alloc] initWithFrame:CGRectZero];
     [_buttonPanel setBackgroundColor: [UIColor blackColor]];
@@ -127,21 +156,10 @@ static const CGFloat kAspectRatio = 125.0f / 86;
     [overlay addSubview:_backButton];
     
     [self.view addSubview:[self createOverlayFullScreen]];
+    [self.view.layer addSublayer:[self createLayerCircle]];
+    
 //    [self.view addSubview:[self createOverlayTop]];
 //    [self.view addSubview:[self createOverlayBottom]];
-
-    
-    CGRect circleRect = CGRectMake(0, (bounds.size.height-bounds.size.width) / 2, bounds.size.width, bounds.size.width);
-        UIBezierPath *circle = [UIBezierPath bezierPathWithOvalInRect:circleRect];
-        CAShapeLayer *ringLayer = [CAShapeLayer layer];
-        ringLayer.path = circle.CGPath;
-        ringLayer.fillColor = [[UIColor clearColor] CGColor];
-        ringLayer.strokeColor = [UIColor blackColor].CGColor;
-        ringLayer.lineWidth = 2.0;
-
-    [self.view.layer addSublayer:ringLayer];
-
-    
     
     return overlay;
 }
@@ -156,6 +174,10 @@ static const CGFloat kAspectRatio = 125.0f / 86;
 
 - (void)layoutForPhone {
     CGRect bounds = [[UIScreen mainScreen] bounds];
+    
+    _changeCamera.frame = CGRectMake(bounds.size.width-kChangeCameraButtonWidthPhone,0,
+                                      kChangeCameraButtonWidthPhone,
+                                      kChangeCameraButtonHeightPhone);
     
     _captureButton.frame = CGRectMake((bounds.size.width / 2) - (kCaptureButtonWidthPhone / 2),
                                       bounds.size.height - kCaptureButtonHeightPhone - kCaptureButtonVerticalInsetPhone,
@@ -266,6 +288,74 @@ static const CGFloat kAspectRatio = 125.0f / 86;
     return YES;
 }
 
+- (void)changeCamera {
+//    _changeCamera.userInteractionEnabled = NO;
+//    _changeCamera.selected = YES;
+    NSLog(@"Camera changed");
+    AVCaptureDevice *captureDevice;
+    
+    if(frontCamera == NO){
+        captureDevice = [self frontFacingCameraIfAvailable];
+        frontCamera = YES;
+    } else {
+        captureDevice = [self backCamera];
+        frontCamera = NO;
+    }
+    
+//    _rearCamera = [AVCaptureDeviceInput
+//                    deviceInputWithDevice:captureDevice
+//                    error:nil];
+    
+}
+
+- (AVCaptureDevice *)backCamera
+{
+    //  look at all the video devices and get the first one that's on the front
+    NSArray *videoDevices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+    AVCaptureDevice *captureDevice = nil;
+    for (AVCaptureDevice *device in videoDevices)
+    {
+        if (device.position == AVCaptureDevicePositionBack)
+        {
+            captureDevice = device;
+            break;
+        }
+    }
+    
+    //  couldn't find one on the front, so just get the default video device.
+    if ( ! captureDevice)
+    {
+        captureDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    }
+    
+    return captureDevice;
+}  
+
+- (AVCaptureDevice *)frontFacingCameraIfAvailable
+{
+    //  look at all the video devices and get the first one that's on the front
+    NSArray *videoDevices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+    AVCaptureDevice *captureDevice = nil;
+    for (AVCaptureDevice *device in videoDevices)
+    {
+        if (device.position == AVCaptureDevicePositionFront)
+        {
+            captureDevice = device;
+            break;
+        }
+    }
+    
+    //  couldn't find one on the front, so just get the default video device.
+    if ( ! captureDevice)
+    {
+        captureDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    }
+    
+    return captureDevice;
+}  
+
+
+
  - (NSUInteger)supportedInterfaceOrientations {
     return UIInterfaceOrientationMaskPortrait;
 }
@@ -326,14 +416,15 @@ static const CGFloat kAspectRatio = 125.0f / 86;
         
         NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageSampleBuffer];
         
-        CGRect bounds = [[UIScreen mainScreen] bounds];
-        CGFloat bottomsize = kCaptureButtonHeightPhone + (kCaptureButtonVerticalInsetPhone * 2);
+//        CGRect bounds = [[UIScreen mainScreen] bounds];
+//        CGFloat bottomsize = kCaptureButtonHeightPhone + (kCaptureButtonVerticalInsetPhone * 2);
         
         UIImage *imagem = [UIImage imageWithData:imageData];
         
-        CGFloat heightScale = imagem.size.height/bounds.size.height;
+//        CGFloat heightScale = imagem.size.height/bounds.size.height;
         
-        CGRect rect = CGRectMake(0, imagem.size.height/2 - bottomsize*heightScale/2, imagem.size.width, bottomsize*heightScale);
+        CGRect rect = CGRectMake(0, (imagem.size.height-imagem.size.width) / 2, imagem.size.width, imagem.size.width);
+        
         CGAffineTransform rectTransform = [self orientationTransformedRectOfImage:imagem];
         rect = CGRectApplyAffineTransform(rect, rectTransform);
         

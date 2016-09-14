@@ -46,7 +46,7 @@ static const CGFloat kCaptureButtonVerticalInsetPhone = 10;
             CGFloat Height = targetWidth;
             CGFloat Width  = targetHeight;
             if(targetWidth == -1 || targetHeight == -1){
-                Height = bottomsize-20;
+                Height = bounds.size.width;
                 Width  = bounds.size.width;
             }
             
