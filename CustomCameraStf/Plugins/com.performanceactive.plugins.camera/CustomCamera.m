@@ -10,8 +10,6 @@
 #import "CustomCameraViewController.h"
 #define CDV_PHOTO_PREFIX @"cdv_photo_"
 
-//static const CGFloat kCaptureButtonHeightPhone = 64;
-//static const CGFloat kCaptureButtonVerticalInsetPhone = 10;
 static NSString* toBase64(NSData* data) {
     SEL s1 = NSSelectorFromString(@"cdv_base64EncodedString");
     SEL s2 = NSSelectorFromString(@"base64EncodedString");

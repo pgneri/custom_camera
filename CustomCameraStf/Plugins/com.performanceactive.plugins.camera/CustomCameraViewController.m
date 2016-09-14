@@ -129,12 +129,12 @@ static const CGFloat kCaptureButtonVerticalInsetTablet = 20;
 - (UIView*)createOverlay {
     UIView *overlay = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     
-    _changeCamera = [UIButton buttonWithType:UIButtonTypeCustom];
-    [_changeCamera setImage:[UIImage imageNamed:@"www/img/icons/camera_toggle.png"] forState:UIControlStateNormal];
-    [_changeCamera setImage:[UIImage imageNamed:@"www/img/icons/camera_toggle-touched.png"] forState:UIControlStateSelected];
-    [_changeCamera setImage:[UIImage imageNamed:@"www/img/icons/camera_toggle-touched.png"] forState:UIControlStateHighlighted];
-    [_changeCamera addTarget:self action:@selector(changeCamera) forControlEvents:UIControlEventTouchUpInside];
-    [overlay addSubview:_changeCamera];
+//    _changeCamera = [UIButton buttonWithType:UIButtonTypeCustom];
+//    [_changeCamera setImage:[UIImage imageNamed:@"www/img/icons/camera_toggle.png"] forState:UIControlStateNormal];
+//    [_changeCamera setImage:[UIImage imageNamed:@"www/img/icons/camera_toggle-touched.png"] forState:UIControlStateSelected];
+//    [_changeCamera setImage:[UIImage imageNamed:@"www/img/icons/camera_toggle-touched.png"] forState:UIControlStateHighlighted];
+//    [_changeCamera addTarget:self action:@selector(changeCamera) forControlEvents:UIControlEventTouchUpInside];
+//    [overlay addSubview:_changeCamera];
     
 
     _buttonPanel = [[UIView alloc] initWithFrame:CGRectZero];
