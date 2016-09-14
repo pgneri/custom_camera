@@ -264,6 +264,17 @@ static bool frontCamera = YES;
             }
         }
         AVCaptureDeviceInput *cameraInput = [AVCaptureDeviceInput deviceInputWithDevice:_rearCamera error:nil];
+        
+        if(cameraInput == nil){
+            NSLog(@"Bricked Camera");
+            for (AVCaptureDevice *device in [AVCaptureDevice devices]) {
+                if ([device hasMediaType:AVMediaTypeVideo] && [device position] == AVCaptureDevicePositionBack) {
+                    _rearCamera = device;
+                }
+            }
+            cameraInput = [AVCaptureDeviceInput deviceInputWithDevice:_rearCamera error:nil];
+        }
+
         [_captureSession addInput:cameraInput];
         _stillImageOutput = [[AVCaptureStillImageOutput alloc] init];
         [_captureSession addOutput:_stillImageOutput];
@@ -317,11 +328,19 @@ static bool frontCamera = YES;
         if(!newVideoInput || err)
         {
             NSLog(@"Error creating capture device input: %@", err.localizedDescription);
+            
+            if(((AVCaptureDeviceInput*)newVideoInput).device.position == AVCaptureDevicePositionBack)
+            {
+                _rearCamera = [self cameraWithPosition:AVCaptureDevicePositionFront];
+            }
+            else
+            {
+                _rearCamera = [self cameraWithPosition:AVCaptureDevicePositionBack];
+            }
+            newVideoInput = [AVCaptureDeviceInput deviceInputWithDevice:_rearCamera error:nil];
         }
-        else
-        {
-            [_captureSession addInput:newVideoInput];
-        }
+        
+        [_captureSession addInput:newVideoInput];
         
         //Commit all the configuration changes at once
         [_captureSession commitConfiguration];
