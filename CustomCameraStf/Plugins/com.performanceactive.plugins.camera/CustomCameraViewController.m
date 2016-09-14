@@ -66,8 +66,9 @@ static const CGFloat kCaptureButtonVerticalInsetTablet = 20;
 - (void)loadView {
     self.view = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.view.backgroundColor = [UIColor blackColor];
+
     AVCaptureVideoPreviewLayer *previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:_captureSession];
-    previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
+//    previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
     previewLayer.frame = self.view.bounds;
     [[self.view layer] addSublayer:previewLayer];
     [self.view addSubview:[self createOverlay]];
@@ -139,7 +140,7 @@ static const CGFloat kCaptureButtonVerticalInsetTablet = 20;
     
 
     _buttonPanel = [[UIView alloc] initWithFrame:CGRectZero];
-    [_buttonPanel setBackgroundColor: [UIColor clearColor]];
+    [_buttonPanel setBackgroundColor: [UIColor blackColor]];
     [overlay addSubview:_buttonPanel];
     
     _captureButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -278,7 +279,7 @@ static const CGFloat kCaptureButtonVerticalInsetTablet = 20;
             }
             cameraInput = [AVCaptureDeviceInput deviceInputWithDevice:_rearCamera error:nil];
         }
-
+        
         [_captureSession addInput:cameraInput];
         _stillImageOutput = [[AVCaptureStillImageOutput alloc] init];
         [_captureSession addOutput:_stillImageOutput];
@@ -421,9 +422,6 @@ static const CGFloat kCaptureButtonVerticalInsetTablet = 20;
     [_stillImageOutput captureStillImageAsynchronouslyFromConnection:videoConnection completionHandler:^(CMSampleBufferRef imageSampleBuffer, NSError *error) {
         
         NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageSampleBuffer];
-        
-//        CGRect bounds = [[UIScreen mainScreen] bounds];
-//        CGFloat bottomsize = kCaptureButtonHeightPhone + (kCaptureButtonVerticalInsetPhone * 2);
         
         UIImage *imagem = [UIImage imageWithData:imageData];
         
