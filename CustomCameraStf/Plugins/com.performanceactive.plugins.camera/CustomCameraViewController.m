@@ -37,6 +37,8 @@ static const CGFloat kBackButtonWidthPhone = 100;
 static const CGFloat kBackButtonHeightPhone = 40;
 static const CGFloat kCaptureButtonVerticalInsetPhone = 10;
 
+static const CGFloat kChangeCameraButtonWidthTablet = 75;
+static const CGFloat kChangeCameraButtonHeightTablet = 75;
 static const CGFloat kCaptureButtonWidthTablet = 75;
 static const CGFloat kCaptureButtonHeightTablet = 75;
 static const CGFloat kBackButtonWidthTablet = 150;
@@ -201,7 +203,6 @@ static const CGFloat kCaptureButtonVerticalInsetTablet = 20;
 }
 
  - (void)layoutForPhoneWithShortScreen {
-     //alterar este para compatibilidade
      CGRect bounds = [[UIScreen mainScreen] bounds];
      
      CGFloat bottomsize = kCaptureButtonHeightPhone + (kCaptureButtonVerticalInsetPhone * 2);
@@ -235,6 +236,10 @@ static const CGFloat kCaptureButtonVerticalInsetTablet = 20;
 
 - (void)layoutForTablet {
     CGRect bounds = [[UIScreen mainScreen] bounds];
+    
+    _changeCamera.frame = CGRectMake(bounds.size.width-kChangeCameraButtonWidthTablet,0,
+                                     kChangeCameraButtonWidthTablet,
+                                     kChangeCameraButtonHeightTablet);
     
     _captureButton.frame = CGRectMake((bounds.size.width / 2) - (kCaptureButtonWidthTablet / 2),
                                       bounds.size.height - kCaptureButtonHeightTablet - kCaptureButtonVerticalInsetTablet,

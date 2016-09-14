@@ -10,8 +10,26 @@
 #import "CustomCameraViewController.h"
 #define CDV_PHOTO_PREFIX @"cdv_photo_"
 
-static const CGFloat kCaptureButtonHeightPhone = 64;
-static const CGFloat kCaptureButtonVerticalInsetPhone = 10;
+//static const CGFloat kCaptureButtonHeightPhone = 64;
+//static const CGFloat kCaptureButtonVerticalInsetPhone = 10;
+static NSString* toBase64(NSData* data) {
+    SEL s1 = NSSelectorFromString(@"cdv_base64EncodedString");
+    SEL s2 = NSSelectorFromString(@"base64EncodedString");
+    SEL s3 = NSSelectorFromString(@"base64EncodedStringWithOptions:");
+    
+    if ([data respondsToSelector:s1]) {
+        NSString* (*func)(id, SEL) = (void *)[data methodForSelector:s1];
+        return func(data, s1);
+    } else if ([data respondsToSelector:s2]) {
+        NSString* (*func)(id, SEL) = (void *)[data methodForSelector:s2];
+        return func(data, s2);
+    } else if ([data respondsToSelector:s3]) {
+        NSString* (*func)(id, SEL, NSUInteger) = (void *)[data methodForSelector:s3];
+        return func(data, s3, 0);
+    } else {
+        return nil;
+    }
+}
 
 @implementation CustomCamera
 
@@ -41,10 +59,9 @@ static const CGFloat kCaptureButtonVerticalInsetPhone = 10;
             } while ([fileMgr fileExistsAtPath:imagePath]);
             
             CGRect bounds = [[UIScreen mainScreen] bounds];
-            CGFloat bottomsize = kCaptureButtonHeightPhone + (kCaptureButtonVerticalInsetPhone * 2);
-
             CGFloat Height = targetWidth;
             CGFloat Width  = targetHeight;
+            
             if(targetWidth == -1 || targetHeight == -1){
                 Height = bounds.size.width;
                 Width  = bounds.size.width;
@@ -54,12 +71,21 @@ static const CGFloat kCaptureButtonVerticalInsetPhone = 10;
             NSData *scaledImageData = UIImageJPEGRepresentation(scaledImage, quality / 100);
             [scaledImageData writeToFile:imagePath atomically:YES];
             CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
-                                                        messageAsString:[[NSURL fileURLWithPath:imagePath] absoluteString]];
+                                                        messageAsString:toBase64(scaledImageData)];
             [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
             [self.viewController dismissViewControllerAnimated:YES completion:nil];
         }];
         [self.viewController presentViewController:cameraViewController animated:YES completion:nil];
     }
+}
+
+- (NSString *)encodeToBase64String:(UIImage *)image {
+    return [UIImagePNGRepresentation(image) base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength];
+}
+
+- (UIImage *)decodeBase64ToImage:(NSString *)strEncodeData {
+    NSData *data = [[NSData alloc]initWithBase64EncodedString:strEncodeData options:NSDataBase64DecodingIgnoreUnknownCharacters];
+    return [UIImage imageWithData:data];
 }
 
 - (UIImage*)scaleImage:(UIImage*)image toSize:(CGSize)targetSize {

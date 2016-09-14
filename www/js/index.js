@@ -37,9 +37,9 @@ var app = {
         app.receivedEvent('deviceready');
     },
      buttonClicked: function() {
-        navigator.customCamera.getPicture('foto', function success(fileUri) {
-            alert("File location: " + fileUri);
-            document.getElementById('foto').src = fileUri;
+        navigator.customCamera.getPicture('foto', function success(base64) {
+            alert("File location: " + base64);
+            document.getElementById('foto').src = "data:image/jpeg;base64,"+base64;
         }, function failure(error) {
             alert(error);
         }, {
