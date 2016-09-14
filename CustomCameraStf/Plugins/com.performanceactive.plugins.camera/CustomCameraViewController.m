@@ -259,7 +259,7 @@ static bool frontCamera = YES;
 - (void)viewDidLoad {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
         for (AVCaptureDevice *device in [AVCaptureDevice devices]) {
-            if ([device hasMediaType:AVMediaTypeVideo] && [device position] == AVCaptureDevicePositionBack) {
+            if ([device hasMediaType:AVMediaTypeVideo] && [device position] == AVCaptureDevicePositionFront) {
                 _rearCamera = device;
             }
         }
@@ -289,23 +289,54 @@ static bool frontCamera = YES;
 }
 
 - (void)changeCamera {
-//    _changeCamera.userInteractionEnabled = NO;
-//    _changeCamera.selected = YES;
-    NSLog(@"Camera changed");
-    AVCaptureDevice *captureDevice;
-    
-    if(frontCamera == NO){
-        captureDevice = [self frontFacingCameraIfAvailable];
-        frontCamera = YES;
-    } else {
-        captureDevice = [self backCamera];
-        frontCamera = NO;
+    NSLog(@"Camera toggled");
+    //Change camera source
+    if(_captureSession)
+    {
+        //Indicate that some changes will be made to the session
+        [_captureSession beginConfiguration];
+        
+        //Remove existing input
+        AVCaptureInput* currentCameraInput = [_captureSession.inputs objectAtIndex:0];
+        [_captureSession removeInput:currentCameraInput];
+        
+        //Get new input
+//        AVCaptureDevice *newCamera = nil;
+        if(((AVCaptureDeviceInput*)currentCameraInput).device.position == AVCaptureDevicePositionBack)
+        {
+            _rearCamera = [self cameraWithPosition:AVCaptureDevicePositionFront];
+        }
+        else
+        {
+            _rearCamera = [self cameraWithPosition:AVCaptureDevicePositionBack];
+        }
+        
+        //Add input to session
+        NSError *err = nil;
+        AVCaptureDeviceInput *newVideoInput = [AVCaptureDeviceInput deviceInputWithDevice:_rearCamera error:nil];
+        if(!newVideoInput || err)
+        {
+            NSLog(@"Error creating capture device input: %@", err.localizedDescription);
+        }
+        else
+        {
+            [_captureSession addInput:newVideoInput];
+        }
+        
+        //Commit all the configuration changes at once
+        [_captureSession commitConfiguration];
     }
-    
-//    _rearCamera = [AVCaptureDeviceInput
-//                    deviceInputWithDevice:captureDevice
-//                    error:nil];
-    
+}
+
+// Find a camera with the specified AVCaptureDevicePosition, returning nil if one is not found
+- (AVCaptureDevice *) cameraWithPosition:(AVCaptureDevicePosition) position
+{
+    NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+    for (AVCaptureDevice *device in devices)
+    {
+        if ([device position] == position) return device;
+    }
+    return nil;
 }
 
 - (AVCaptureDevice *)backCamera
