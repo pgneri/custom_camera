@@ -42,7 +42,9 @@ var app = {
         }, function failure(error) {
             alert(error);
         }, {
-            quality: 100
+            quality: 100,
+            targetWidth: 100,
+            targetHeight:100
         });
     },
     // Update DOM on a Received Event
